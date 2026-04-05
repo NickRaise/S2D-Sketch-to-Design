@@ -3,6 +3,8 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
+// Database Design: https://drawsql.app/teams/nikhil-kumar-17/diagrams/s2c
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +12,223 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+
+enum CreditType {
+  grant
+  consume
+  adjust
+}
+
+enum SubscriptionStatus {
+  active
+  canceled
+  past_due
+  trialing
+}
+
+enum PlanType {
+  basic
+  pro
+}
+
+enum ImageType {
+  moodBoard
+  inspiration
+}
+
+enum GenerationStatus {
+  pending
+  running
+  completed
+  failed
+}
+
+model User {
+  id              String  @id @default(uuid())
+  
+  name            String
+  email           String  @unique
+  image           String?
+
+  projects         Project[]
+  subscription    Subscription?
+  creditBalance   CreditBalance?
+  creditLedger    CreditLedger[]    
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt()
+}
+
+model Subscription {
+  id                String  @id @default(uuid())
+  stripeCustomerId  String
+  stripeSubId       String
+  status            SubscriptionStatus
+  planType          PlanType
+  currentPeriodEnd  DateTime
+  cancelAt          DateTime?
+  trialEndsAt       DateTime?
+
+  userId            String @unique
+  user              User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledgerEntries     CreditLedger[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt()
+
+  @@index([userId])
+  @@index([stripeSubId])
+}
+
+model CreditBalance {
+  id              String  @id @default(uuid())
+
+  balance         Int @default(0)
+
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt()
+}
+
+model CreditLedger {
+  id              String  @id @default(uuid())
+
+  amount          Int
+  type            CreditType
+  reason          String?
+  idempotencyKey  String @unique
+  metaData        Json?
+
+  subscriptionId  String?
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id])
+  userId          String
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([subscriptionId])
+}
+
+model Project {
+  id                String  @id @default(uuid())
+  name              String
+  description       String?
+  viewportData      Json?
+  thumbnail         String?
+  isPublic          Boolean @default(false)
+
+  userId            String
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images            ProjectImage[]
+  styleGuide        StyleGuide?
+  frames            Frame[]
+  generationJobs    GenerationJob[]
+  results           GeneratedResult[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt()
+
+  @@index([userId])
+}
+
+model ProjectImage {
+  id              String  @id @default(uuid())
+  url             String
+  type            ImageType
+
+  projectId       String
+  project         Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+
+  @@index([projectId])
+}
+
+model StyleGuide {
+  id                String  @id @default(uuid())
+  themeName         String
+  themeDescription  String
+  colors            Json
+  typography        Json
+  rawOutput         Json
+
+  projectId         String  @unique
+  project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  jobs              GenerationJob[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt()
+}
+
+model Frame {
+  id                String  @id @default(uuid())
+  name              String? // Can remove this
+  
+  projectId         String
+  project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  shapes            Shape[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt()
+
+  @@index([projectId])
+}
+
+model GenerationJob {
+  id                String  @id @default(uuid())
+  status            GenerationStatus
+  error             String?
+  inputSnapshot     Json  // stores all the input values: Frame, images, styleGuide, prompt
+
+  projectId         String
+  project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  styleGuideId      String?
+  styleGuide        StyleGuide? @relation(fields: [styleGuideId], references: [id])
+  result            GeneratedResult[]
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt()
+
+  @@index([projectId, status])
+  @@index([createdAt])
+}
+
+model GeneratedResult {
+  id                String  @id @default(uuid())
+  htmlOutput        String?
+  version           Int
+  status            GenerationStatus
+
+  jobId             String
+  job               GenerationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  projectId         String
+  project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([projectId, version])
+}
+
+model Shape {
+  id                String  @id @default(uuid())
+  type              String // arrow,line,rectangle,circle,text
+  height            Float
+  width             Float
+  x                 Float
+  y                 Float
+  text              String?
+  props             Json  // colors, fontsize, font
+  
+  frameId           String
+  frame             Frame @relation(fields: [frameId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt()
+
+  @@index([frameId])
 }
