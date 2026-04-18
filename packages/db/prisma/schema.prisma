@@ -46,7 +46,7 @@ enum GenerationStatus {
 }
 
 model User {
-  id              String  @id @default(uuid())
+  id              String  @id @default(cuid())
   
   name            String
   email           String  @unique
@@ -62,7 +62,7 @@ model User {
 }
 
 model Subscription {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   stripeCustomerId  String
   stripeSubId       String
   status            SubscriptionStatus
@@ -83,7 +83,7 @@ model Subscription {
 }
 
 model CreditBalance {
-  id              String  @id @default(uuid())
+  id              String  @id @default(cuid())
 
   balance         Int @default(0)
 
@@ -95,7 +95,7 @@ model CreditBalance {
 }
 
 model CreditLedger {
-  id              String  @id @default(uuid())
+  id              String  @id @default(cuid())
 
   amount          Int
   type            CreditType
@@ -115,7 +115,7 @@ model CreditLedger {
 }
 
 model Project {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   name              String
   description       String?
   viewportData      Json?
@@ -137,7 +137,7 @@ model Project {
 }
 
 model ProjectImage {
-  id              String  @id @default(uuid())
+  id              String  @id @default(cuid())
   url             String
   type            ImageType
 
@@ -150,7 +150,7 @@ model ProjectImage {
 }
 
 model StyleGuide {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   themeName         String
   themeDescription  String
   colors            Json
@@ -166,7 +166,7 @@ model StyleGuide {
 }
 
 model Frame {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   name              String? // Can remove this
   x                 Float
   y                 Float
@@ -184,7 +184,7 @@ model Frame {
 }
 
 model GenerationJob {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   status            GenerationStatus
   error             String?
   inputSnapshot     Json  // stores all the input values: Frame, images, styleGuide, prompt
@@ -203,7 +203,7 @@ model GenerationJob {
 }
 
 model GeneratedResult {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   htmlOutput        String?
   version           Int
   status            GenerationStatus
@@ -214,12 +214,15 @@ model GeneratedResult {
   projectId         String
   project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt()
+
   @@index([projectId])
   @@index([projectId, version])
 }
 
 model Shape {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   type              String // arrow,line,rectangle,circle,text
   height            Float
   width             Float
