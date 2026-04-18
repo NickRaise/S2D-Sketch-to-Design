@@ -101,7 +101,7 @@ model CreditLedger {
   type            CreditType
   reason          String?
   idempotencyKey  String @unique
-  metaData        Json?
+  metadata        Json?
 
   subscriptionId  String?
   subscription    Subscription? @relation(fields: [subscriptionId], references: [id])
@@ -112,6 +112,7 @@ model CreditLedger {
 
   @@index([userId])
   @@index([subscriptionId])
+  @@index([idempotencyKey])
 }
 
 model Project {
