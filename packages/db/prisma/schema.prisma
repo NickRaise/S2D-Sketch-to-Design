@@ -168,6 +168,10 @@ model StyleGuide {
 model Frame {
   id                String  @id @default(uuid())
   name              String? // Can remove this
+  x                 Float
+  y                 Float
+  height            Float
+  width             Float
   
   projectId         String
   project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -222,7 +226,7 @@ model Shape {
   x                 Float
   y                 Float
   text              String?
-  props             Json  // colors, fontsize, font
+  style             Json  // colors, fontsize, font
   
   frameId           String
   frame             Frame @relation(fields: [frameId], references: [id], onDelete: Cascade)
