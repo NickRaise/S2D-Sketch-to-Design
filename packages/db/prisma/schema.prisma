@@ -6,7 +6,7 @@
 // Database Design: https://drawsql.app/teams/nikhil-kumar-17/diagrams/s2c
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
