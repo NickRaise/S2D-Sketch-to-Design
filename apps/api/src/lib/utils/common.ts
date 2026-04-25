@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 /**
  * Sends a standardized JSON HTTP response with a success flag and data payload.
@@ -18,14 +18,14 @@ export function HttpResponse(req: Response, statusCode: number, data?: string) {
  * Async handler wrapper for API routes
  * @param fn - The async API route handler function
  */
-export async function asyncHandler(
+export function asyncHandler(
   fn: (req: Request, res: Response) => Promise<void>,
 ) {
-  return async (req: Request, res: Response) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
       await fn(req, res);
     } catch (error) {
-      throw new Error("Internal Server Error");
+      next(error);
     }
   };
 }
