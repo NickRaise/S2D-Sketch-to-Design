@@ -18,7 +18,7 @@ export function HttpResponse(req: Response, statusCode: number, data?: string) {
  * Async handler wrapper for API routes
  * @param fn - The async API route handler function
  */
-export async function handleAsyncErrors(
+export async function asyncHandler(
   fn: (req: Request, res: Response) => Promise<void>,
 ) {
   return async (req: Request, res: Response) => {
