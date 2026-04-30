@@ -45,16 +45,12 @@ const handler = NextAuth({
         token.email = profile.email;
         token.name = profile.name;
         token.picture = profile.image;
-
-        token.userId = "temp-google-user-id"; // TEMP: Will replace with actual user ID from DB
       }
 
       // For Credentials logic
       if (user) {
         token.email = user.email;
         token.name = user.name;
-
-        token.userId = user.id;
       }
 
       return token;

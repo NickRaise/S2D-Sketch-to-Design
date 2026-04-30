@@ -1,13 +1,39 @@
 "use client";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useState } from "react";
+import axios from "axios";
 
 const page = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleOnSubmit = async () => {
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl: "/",
+    });
+
+    console.log("SignIn response", res);
+
+    if (res?.ok) {
+      const result = await axios.post("http://localhost:3000/api/auth/login", {
+        email,
+        password,
+      });
+      console.log("Login API response", result);
+      alert("Login successful");
+    } else {
+      alert("Login failed");
+    }
+  };
 
   const loginInfo = {
     title: "Welcome back",
@@ -58,6 +84,8 @@ const page = () => {
                 name="email"
                 placeholder="you@example.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -65,10 +93,23 @@ const page = () => {
               <Label htmlFor="password" className="text-sm">
                 Password
               </Label>
-              <Input type="password" id="password" name="password" required />
+              <Input
+                type="password"
+                id="password"
+                name="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
 
-            <Button className="w-full">
+            <Button
+              className="w-full"
+              onClick={(e) => {
+                e.preventDefault();
+                handleOnSubmit();
+              }}
+            >
               {isLogin ? loginInfo.action : signUpInfo.action}
             </Button>
           </form>
@@ -82,7 +123,11 @@ const page = () => {
           </div>
 
           <div className="grid grid-cols-1">
-            <Button type="button" variant="outline">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => signIn("google")}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="size-4"

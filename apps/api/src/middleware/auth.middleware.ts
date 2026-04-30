@@ -14,4 +14,6 @@ export const authMiddleware = (
   }
 
   const parsedCookies = parse(cookies);
+  console.log("Parsed Cookies:", parsedCookies);
+  next();
 };
