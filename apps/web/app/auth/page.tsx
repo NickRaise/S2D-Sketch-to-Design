@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import axios from "axios";
 import { ISignUpResponse } from "@/types/auth";
+import { useRouter } from "next/navigation";
 
 async function handleLogin(email: string, password: string, image?: string) {
   try {
@@ -51,6 +52,13 @@ const page = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
+
+  const { data: session } = useSession();
+  if (session) {
+    console.log("User already logged in:", session.user);
+    router.push("/");
+  }
 
   const handleOnSubmit = async () => {
     const res = await signIn("credentials", {
