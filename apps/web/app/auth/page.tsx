@@ -7,9 +7,48 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import axios from "axios";
+import { ISignUpResponse } from "@/types/auth";
+
+async function handleLogin(email: string, password: string, image?: string) {
+  try {
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl: "/",
+    });
+
+    if (res?.ok) {
+      console.log("Login successful");
+    } else {
+      console.error("Login failed", res);
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+  }
+}
+
+async function handleSignUp(name: string, email: string, password: string) {
+  try {
+    const res = await axios.post<ISignUpResponse>(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`,
+      {
+        name,
+        email,
+        password,
+      },
+    );
+
+    const result = res.data;
+    console.log("Sign up successful");
+  } catch (error) {
+    console.error("Sign up error:", error);
+  }
+}
 
 const page = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -21,17 +60,10 @@ const page = () => {
       callbackUrl: "/",
     });
 
-    console.log("SignIn response", res);
-
-    if (res?.ok) {
-      const result = await axios.post("http://localhost:3000/api/auth/login", {
-        email,
-        password,
-      });
-      console.log("Login API response", result);
-      alert("Login successful");
+    if (isLogin) {
+      await handleLogin(email, password);
     } else {
-      alert("Login failed");
+      await handleSignUp(name, email, password);
     }
   };
 
@@ -74,6 +106,23 @@ const page = () => {
         </div>
         <Card variant="outline" className="mt-6 p-8">
           <form action="" className="space-y-5">
+            {!isLogin && (
+              <div className="space-y-3">
+                <Label htmlFor="name" className="text-sm">
+                  Name
+                </Label>
+                <Input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Your full name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+            )}
+
             <div className="space-y-3">
               <Label htmlFor="email" className="text-sm">
                 Email

@@ -7,10 +7,17 @@ import { NextFunction, Request, Response } from "express";
  * @param data - The data payload to include in the response
  * @returns A JSON response with a success flag and the provided data
  */
-export function HttpResponse(req: Response, statusCode: number, data?: string) {
+export function HttpResponse(
+  req: Response,
+  statusCode: number,
+  data: Record<string, any>,
+) {
+  const { message, ...rest } = data;
+
   return req.status(statusCode).json({
     success: true,
-    data,
+    message,
+    data: rest,
   });
 }
 

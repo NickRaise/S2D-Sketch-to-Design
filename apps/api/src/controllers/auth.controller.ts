@@ -1,42 +1,80 @@
 import { Request, Response } from "express";
-import { findEmailById } from "../services/auth.service";
+import { createUser, findUserByEmail } from "../services/auth.service";
 import { HttpError } from "../lib/errors/HttpError";
 import { HttpResponse } from "../lib/utils/common";
+import bcrypt from "bcrypt";
+import { User } from "@db/prisma/types";
+
+function extractUserResponseData(user: User) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+  };
+}
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
 
-  // if email in db throw error
-  const user = await findEmailById(email);
+  const user = await findUserByEmail(email);
 
   if (user) {
     throw HttpError.BadRequest("Email already exists");
   }
 
-  // hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  // save user to db
+  const newUser = await createUser({
+    name,
+    email,
+    password: hashedPassword,
+    authProvider: "credential",
+  });
 
-  // set the token in cookie
-
-  // send success response
-  HttpResponse(res, 201, "User registered successfully");
+  HttpResponse(res, 201, {
+    message: "User registered successfully",
+    user: extractUserResponseData(newUser),
+  });
 };
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  // find user by email
+  const user = await findUserByEmail(email);
 
-  // if user not found throw error
+  if (!user) {
+    throw HttpError.BadRequest("Invalid email or password");
+  }
 
-  // compare password
+  const isPasswordValid = await bcrypt.compare(password, user.password || "");
 
-  // throw error if password does not match
+  if (!isPasswordValid) {
+    throw HttpError.BadRequest("Invalid email or password");
+  }
 
-  // set the token in cookie
+  HttpResponse(res, 200, {
+    message: "Login successful",
+    user: extractUserResponseData(user),
+  });
+};
 
-  // send success response
+export const googleOAuth = async (req: Request, res: Response) => {
+  const { email, name, image } = req.body;
 
-  HttpResponse(res, 200, "User logged in successfully");
+  let user = await findUserByEmail(email);
+
+  if (!user) {
+    user = await createUser({
+      name,
+      email,
+      image,
+      authProvider: "google",
+    });
+  }
+
+  HttpResponse(res, 200, {
+    message: "Login successful",
+    user: extractUserResponseData(user),
+  });
 };

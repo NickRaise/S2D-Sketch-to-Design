@@ -45,6 +45,11 @@ enum GenerationStatus {
   failed
 }
 
+enum AuthProvider {
+  google
+  credential
+}
+
 model User {
   id              String  @id @default(cuid())
   
@@ -52,7 +57,10 @@ model User {
   email           String  @unique
   image           String?
 
-  projects         Project[]
+  password        String?
+  authProvider    AuthProvider        
+
+  projects        Project[]
   subscription    Subscription?
   creditBalance   CreditBalance?
   creditLedger    CreditLedger[]    

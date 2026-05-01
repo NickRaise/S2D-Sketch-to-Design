@@ -1,8 +1,16 @@
 import prisma from "@db/prisma";
 import { HttpError } from "../lib/errors/HttpError";
-import { User } from "@db/prisma/types";
+import { AuthProvider, User } from "@db/prisma/types";
 
-export const findEmailById = async (email: string): Promise<User | null> => {
+interface ICreateUserData {
+  name: string;
+  email: string;
+  image?: string | null;
+  password?: string | null;
+  authProvider: AuthProvider;
+}
+
+export const findUserByEmail = async (email: string): Promise<User | null> => {
   try {
     return await prisma.user.findUnique({
       where: {
@@ -12,5 +20,16 @@ export const findEmailById = async (email: string): Promise<User | null> => {
   } catch (error) {
     console.error("Error finding user by email:", error);
     throw HttpError.InternalServerError("Error finding user by email");
+  }
+};
+
+export const createUser = async (data: ICreateUserData): Promise<User> => {
+  try {
+    return await prisma.user.create({
+      data: data,
+    });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw HttpError.InternalServerError("Error creating user");
   }
 };
