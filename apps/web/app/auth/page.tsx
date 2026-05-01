@@ -55,23 +55,18 @@ const page = () => {
   const router = useRouter();
 
   const { data: session } = useSession();
-  if (session) {
-    console.log("User already logged in:", session.user);
-    router.push("/");
-  }
+  useEffect(() => {
+    if (session) {
+      router.push("/");
+    }
+  }, [session, router]);
 
   const handleOnSubmit = async () => {
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl: "/",
-    });
-
     if (isLogin) {
       await handleLogin(email, password);
     } else {
       await handleSignUp(name, email, password);
+      await handleLogin(email, password);
     }
   };
 
