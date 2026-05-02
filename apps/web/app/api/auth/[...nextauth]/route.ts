@@ -1,3 +1,4 @@
+import api from "@/lib/axios";
 import { IAuthResponse } from "@/types/auth";
 import axios from "axios";
 import NextAuth, { NextAuthOptions, Profile } from "next-auth";
@@ -48,7 +49,7 @@ export const authOptions: NextAuthOptions = {
         token.name = profile.name;
         token.image = profile.image;
 
-        // is google oauth
+        // google oauth
         if (account?.provider === "google") {
           const userData = await handleGoogleOAuth(profile);
           if (userData) {
@@ -93,14 +94,11 @@ async function handleGoogleOAuth(
   profile: Profile,
 ): Promise<IAuthResponse["user"] | null> {
   try {
-    const response = await axios.post<IAuthResponse>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/oauth/google`,
-      {
-        email: profile.email,
-        name: profile.name,
-        image: profile.image,
-      },
-    );
+    const response = await api.post<IAuthResponse>("auth/oauth/google", {
+      email: profile.email,
+      name: profile.name,
+      image: profile.image,
+    });
 
     const data = response.data;
     if (!data.success) {
@@ -119,13 +117,10 @@ async function handleLogin(
   password: string,
 ): Promise<IAuthResponse["user"] | null> {
   try {
-    const response = await axios.post<IAuthResponse>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`,
-      {
-        email,
-        password,
-      },
-    );
+    const response = await api.post<IAuthResponse>("auth/login", {
+      email,
+      password,
+    });
 
     const data = response.data;
     if (!data.success) {
