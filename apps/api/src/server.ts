@@ -24,6 +24,12 @@ app.get("/me", authMiddleware, (req: Request, res: Response) => {
   return res.status(200).json({ data: "This is protected route" });
 });
 
+// global error handler
+app.use((err: any, req: Request, res: Response) => {
+  console.error("Global error handler:", err);
+  res.status(500).json({ error: "Internal Server Error" });
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log("Api server is running...");

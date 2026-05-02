@@ -1,10 +1,10 @@
-import { GoogleOAuthResponse, ILoginResponse } from "@/types/auth";
+import { IAuthResponse } from "@/types/auth";
 import axios from "axios";
-import NextAuth, { Profile } from "next-auth";
+import NextAuth, { NextAuthOptions, Profile } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -85,13 +85,15 @@ const handler = NextAuth({
   pages: {
     signIn: "/",
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 async function handleGoogleOAuth(
   profile: Profile,
-): Promise<GoogleOAuthResponse["user"] | null> {
+): Promise<IAuthResponse["user"] | null> {
   try {
-    const response = await axios.post<GoogleOAuthResponse>(
+    const response = await axios.post<IAuthResponse>(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/oauth/google`,
       {
         email: profile.email,
@@ -115,9 +117,9 @@ async function handleGoogleOAuth(
 async function handleLogin(
   email: string,
   password: string,
-): Promise<ILoginResponse["user"] | null> {
+): Promise<IAuthResponse["user"] | null> {
   try {
-    const response = await axios.post<ILoginResponse>(
+    const response = await axios.post<IAuthResponse>(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`,
       {
         email,
@@ -137,4 +139,4 @@ async function handleLogin(
   }
 }
 
-export { handler as GET, handler as POST };
+export { handler as GET, authOptions as POST };

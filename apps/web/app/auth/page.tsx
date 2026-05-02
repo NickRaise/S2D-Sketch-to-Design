@@ -19,6 +19,7 @@ async function handleLogin(email: string, password: string, image?: string) {
       callbackUrl: "/",
     });
 
+    // TODO: handle functionality after login, such as redirecting to the homepage or showing a success message
     if (res?.ok) {
       console.log("Login successful");
     } else {
@@ -40,6 +41,7 @@ async function handleSignUp(name: string, email: string, password: string) {
       },
     );
 
+    // TODO: handle functionality after sign up, such as redirecting to the homepage or showing a success message
     const result = res.data;
     console.log("Sign up successful");
   } catch (error) {
