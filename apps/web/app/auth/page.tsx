@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import axios from "axios";
-import { ISignUpResponse } from "@/types/auth";
 import { useRouter } from "next/navigation";
+import { IAuthResponse } from "@/types/auth";
 
 async function handleLogin(email: string, password: string, image?: string) {
   try {
@@ -32,7 +32,7 @@ async function handleLogin(email: string, password: string, image?: string) {
 
 async function handleSignUp(name: string, email: string, password: string) {
   try {
-    const res = await axios.post<ISignUpResponse>(
+    const res = await axios.post<IAuthResponse>(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`,
       {
         name,
