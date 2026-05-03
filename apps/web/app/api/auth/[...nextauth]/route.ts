@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
         // Temporary hardcoded admin user for testing
         if (
           credentials?.email == "nikhil@gmail.com" &&
-          credentials.password == "123456"
+          credentials.password == "12345678"
         ) {
           return {
             id: "item-user",

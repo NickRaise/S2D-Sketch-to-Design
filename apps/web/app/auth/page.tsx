@@ -16,7 +16,7 @@ const page = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-  const { login, signup, loading } = useAuth();
+  const { login, signup, loading, error, clearError } = useAuth();
 
   const { data: session } = useSession();
   useEffect(() => {
@@ -118,6 +118,7 @@ const page = () => {
               />
             </div>
 
+            {error && <p className="text-destructive text-sm">{error}</p>}
             <Button
               className="w-full"
               disabled={loading}
@@ -181,7 +182,10 @@ const page = () => {
           {isLogin ? loginInfo.redirectText : signUpInfo.redirectText}
           <button
             className="text-primary font-medium hover:underline hover:cursor-pointer"
-            onClick={() => setIsLogin((state) => !state)}
+            onClick={() => {
+              setIsLogin((state) => !state);
+              clearError();
+            }}
           >
             {isLogin ? loginInfo.redirectLinkText : signUpInfo.redirectLinkText}
           </button>
