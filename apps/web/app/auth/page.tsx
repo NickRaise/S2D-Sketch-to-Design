@@ -181,7 +181,7 @@ const page = () => {
         <p className="text-muted-foreground mt-6 text-center text-sm">
           {isLogin ? loginInfo.redirectText : signUpInfo.redirectText}
           <button
-            className="text-primary font-medium hover:underline hover:cursor-pointer"
+            className="text-secondary font-medium hover:underline hover:cursor-pointer"
             onClick={() => {
               setIsLogin((state) => !state);
               clearError();

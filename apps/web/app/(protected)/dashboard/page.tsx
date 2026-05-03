@@ -4,6 +4,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 const page = async () => {
   const session = await getServerSession(authOptions);
 
+  // Add logic to verify valid subscription
+
   try {
     console.log("session in server component:", session);
     const response = await api.get("/me");
