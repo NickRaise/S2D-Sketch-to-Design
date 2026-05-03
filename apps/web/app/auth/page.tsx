@@ -6,48 +6,9 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import axios from "axios";
 import { useRouter } from "next/navigation";
-import { IAuthResponse } from "@/types/auth";
-
-async function handleLogin(email: string, password: string, image?: string) {
-  try {
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl: "/",
-    });
-
-    // TODO: handle functionality after login, such as redirecting to the homepage or showing a success message
-    if (res?.ok) {
-      console.log("Login successful");
-    } else {
-      console.error("Login failed", res);
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-  }
-}
-
-async function handleSignUp(name: string, email: string, password: string) {
-  try {
-    const res = await axios.post<IAuthResponse>(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`,
-      {
-        name,
-        email,
-        password,
-      },
-    );
-
-    // TODO: handle functionality after sign up, such as redirecting to the homepage or showing a success message
-    const result = res.data;
-    console.log("Sign up successful");
-  } catch (error) {
-    console.error("Sign up error:", error);
-  }
-}
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const page = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -55,6 +16,7 @@ const page = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { login, signup, loading } = useAuth();
 
   const { data: session } = useSession();
   useEffect(() => {
@@ -65,10 +27,9 @@ const page = () => {
 
   const handleOnSubmit = async () => {
     if (isLogin) {
-      await handleLogin(email, password);
+      await login(email, password);
     } else {
-      await handleSignUp(name, email, password);
-      await handleLogin(email, password);
+      await signup(name, email, password);
     }
   };
 
@@ -159,12 +120,19 @@ const page = () => {
 
             <Button
               className="w-full"
+              disabled={loading}
               onClick={(e) => {
                 e.preventDefault();
                 handleOnSubmit();
               }}
             >
-              {isLogin ? loginInfo.action : signUpInfo.action}
+              {loading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : isLogin ? (
+                loginInfo.action
+              ) : (
+                signUpInfo.action
+              )}
             </Button>
           </form>
 
