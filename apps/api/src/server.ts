@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { authRouter } from "./routes/auth";
 import { authMiddleware } from "./middleware/auth.middleware";
+import { HttpError } from "./lib/errors/HttpError";
 
 dotenv.config();
 const app = express();
@@ -27,7 +28,14 @@ app.get("/me", authMiddleware, (req: Request, res: Response) => {
 // global error handler
 app.use((err: any, req: Request, res: Response) => {
   console.error("Global error handler:", err);
-  res.status(500).json({ error: "Internal Server Error" });
+  if (err instanceof HttpError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      error: err.message,
+    });
+  } else {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 const port = process.env.PORT || 3000;
