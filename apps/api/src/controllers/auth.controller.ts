@@ -128,6 +128,16 @@ export const refresh = async (req: Request, res: Response) => {
   const user = await findUserById(payload.userId);
   if (!user) throw HttpError.Unauthorized("User not found");
 
+  // TODO: implement refresh token rotation with DB storage
+  // DB table:
+  // RefreshToken {
+  //   id
+  //   userId
+  //   tokenHash
+  //   expiresAt
+  // }
+  // Add CSRF token for extra security, if needed
+
   const isProd = process.env.NODE_ENV === "production";
   res.cookie("access_token", generateAccessToken(toTokenPayload(user)), {
     httpOnly: true,
