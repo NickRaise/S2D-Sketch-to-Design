@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,14 +15,21 @@ const page = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-  const { login, signup, loading, error, clearError } = useAuth();
+  const { login, signup, googleSignIn, loading, isCheckingAuth, error, clearError, user } = useAuth();
 
-  const { data: session } = useSession();
   useEffect(() => {
-    if (session) {
+    if (!isCheckingAuth && user) {
       router.push("/");
     }
-  }, [session, router]);
+  }, [user, isCheckingAuth, router]);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="bg-background flex min-h-screen items-center justify-center">
+        <Loader2 className="size-6 animate-spin" />
+      </div>
+    );
+  }
 
   const handleOnSubmit = async () => {
     if (isLogin) {
@@ -149,7 +155,8 @@ const page = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => signIn("google")}
+              disabled={loading}
+              onClick={() => googleSignIn()}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

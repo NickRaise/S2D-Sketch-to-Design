@@ -1,18 +1,20 @@
+import { cookies } from "next/headers";
 import api from "@/lib/axios";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-const page = async () => {
-  const session = await getServerSession(authOptions);
+import { IApiResponse, IAuthData } from "@/types/auth";
 
-  // Add logic to verify valid subscription
+const page = async () => {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("access_token")?.value;
 
   try {
-    console.log("session in server component:", session);
-    const response = await api.get("/me");
-  } catch (error) {
-    console.error("Error fetching protected data:", error);
+    const response = await api.get<IApiResponse<IAuthData>>("/me", {
+      headers: { Cookie: `access_token=${accessToken}` },
+    });
+    const user = response.data.data.user;
+    return <div>Welcome, {user.name}</div>;
+  } catch {
+    return <div>Error loading dashboard</div>;
   }
-  return <div>page</div>;
 };
 
 export default page;

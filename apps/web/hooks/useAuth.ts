@@ -1,94 +1,95 @@
 "use client";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { IAuthResponse } from "@/types/auth";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const EMAIL_REGEX = /\S+@\S+\.\S+/;
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
-function validate(
-  email: string,
-  password: string,
-  name?: string,
-): string | null {
-  if (name !== undefined && !name) {
-    return "All fields are required.";
-  }
-
-  if (!email || !password) {
-    return "Email and password are required.";
-  }
-
-  if (!EMAIL_REGEX.test(email)) {
-    return "Please enter a valid email address.";
-  }
-
-  if (password.length < 8) {
-    return "Password must be at least 8 characters.";
-  }
-
+function validate(email: string, password: string, name?: string): string | null {
+  if (name !== undefined && !name) return "All fields are required.";
+  if (!email || !password) return "Email and password are required.";
+  if (!EMAIL_REGEX.test(email)) return "Please enter a valid email address.";
+  if (password.length < 8) return "Password must be at least 8 characters.";
   return null;
 }
 
+function extractApiError(err: unknown): string {
+  if (axios.isAxiosError(err) && err.response?.data?.error) {
+    return err.response.data.error;
+  }
+  return GENERIC_ERROR;
+}
+
 export function useAuth() {
+  const {
+    user,
+    isCheckingAuth,
+    login: authLogin,
+    signup: authSignup,
+    googleLogin: authGoogleLogin,
+    logout: authLogout,
+  } = useAuthContext();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const googleSignIn = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true);
+      setError(null);
+      try {
+        await authGoogleLogin(tokenResponse.access_token);
+        router.push("/");
+      } catch (e) {
+        setError(extractApiError(e));
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: () => setError("Google sign-in failed. Please try again."),
+  });
 
   async function login(email: string, password: string) {
-    const validationError = validate(email, password);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    const err = validate(email, password);
+    if (err) { setError(err); return; }
 
     setLoading(true);
     setError(null);
     try {
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-        callbackUrl: "/",
-      });
-
-      if (res?.ok) {
-        // TODO: Add toast and redirect logic after successful login
-        console.log("Login successful");
-      } else {
-        setError("Invalid email or password.");
-      }
-    } catch {
-      setError(GENERIC_ERROR);
+      await authLogin(email, password);
+      router.push("/");
+    } catch (e) {
+      setError(extractApiError(e));
     } finally {
       setLoading(false);
     }
   }
 
   async function signup(name: string, email: string, password: string) {
-    const validationError = validate(email, password, name);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    const err = validate(email, password, name);
+    if (err) { setError(err); return; }
 
     setLoading(true);
     setError(null);
     try {
-      await axios.post<IAuthResponse>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`,
-        { name, email, password },
-      );
-
-      await login(email, password);
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError(GENERIC_ERROR);
-      }
+      await authSignup(name, email, password);
+      router.push("/");
+    } catch (e) {
+      setError(extractApiError(e));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function logout() {
+    try {
+      await authLogout();
+    } finally {
+      router.push("/auth");
     }
   }
 
@@ -96,5 +97,5 @@ export function useAuth() {
     setError(null);
   }
 
-  return { login, signup, loading, error, clearError };
+  return { user, loading, isCheckingAuth, error, login, signup, googleSignIn, logout, clearError };
 }
