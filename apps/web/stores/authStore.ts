@@ -19,7 +19,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   checkAuth: async () => {
     try {
       const res = await api.get<IApiResponse<IAuthData>>("/me");
-      set({ user: res.data.data.user });
+      set({ user: res.data.user });
     } catch {
       set({ user: null });
     } finally {
@@ -29,17 +29,17 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (email, password) => {
     const res = await api.post<IApiResponse<IAuthData>>("/auth/login", { email, password });
-    set({ user: res.data.data.user });
+    set({ user: res.data.user });
   },
 
   signup: async (name, email, password) => {
     const res = await api.post<IApiResponse<IAuthData>>("/auth/register", { name, email, password });
-    set({ user: res.data.data.user });
+    set({ user: res.data.user });
   },
 
   googleLogin: async (accessToken) => {
     const res = await api.post<IApiResponse<IAuthData>>("/auth/oauth/google", { accessToken });
-    set({ user: res.data.data.user });
+    set({ user: res.data.user });
   },
 
   logout: async () => {

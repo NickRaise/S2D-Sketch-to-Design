@@ -14,12 +14,9 @@ export function HttpResponse(
   statusCode: number,
   data: Record<string, any>,
 ) {
-  const { message, ...rest } = data;
-
   return req.status(statusCode).json({
     success: true,
-    message,
-    data: rest,
+    ...data,
   });
 }
 

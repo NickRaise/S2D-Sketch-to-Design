@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { HttpError } from "../lib/errors/HttpError";
 import { verifyAccessToken, TokenPayload } from "../lib/utils/tokens";
 
-export interface AuthRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
@@ -11,7 +11,7 @@ export interface AuthRequest extends Request {
 }
 
 export const authMiddleware = (
-  req: AuthRequest,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {

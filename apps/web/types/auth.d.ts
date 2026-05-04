@@ -5,11 +5,10 @@ export interface IUser {
   image?: string;
 }
 
-export interface IApiResponse<T = Record<string, unknown>> {
+export type IApiResponse<T = Record<string, unknown>> = {
   success: boolean;
   message: string;
-  data: T;
-}
+} & T;
 
 export interface IAuthData {
   user: IUser;

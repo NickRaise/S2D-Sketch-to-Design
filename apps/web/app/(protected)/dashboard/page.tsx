@@ -10,7 +10,7 @@ const page = async () => {
     const response = await api.get<IApiResponse<IAuthData>>("/me", {
       headers: { Cookie: `access_token=${accessToken}` },
     });
-    const user = response.data.data.user;
+    const user = response.data.user;
     return <div>Welcome, {user.name}</div>;
   } catch {
     return <div>Error loading dashboard</div>;
