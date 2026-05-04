@@ -3,12 +3,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuthStore } from "@/stores/authStore";
 
 const EMAIL_REGEX = /\S+@\S+\.\S+/;
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
-function validate(email: string, password: string, name?: string): string | null {
+function validate(
+  email: string,
+  password: string,
+  name?: string,
+): string | null {
   if (name !== undefined && !name) return "All fields are required.";
   if (!email || !password) return "Email and password are required.";
   if (!EMAIL_REGEX.test(email)) return "Please enter a valid email address.";
@@ -31,8 +35,7 @@ export function useAuth() {
     signup: authSignup,
     googleLogin: authGoogleLogin,
     logout: authLogout,
-  } = useAuthContext();
-
+  } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -55,7 +58,10 @@ export function useAuth() {
 
   async function login(email: string, password: string) {
     const err = validate(email, password);
-    if (err) { setError(err); return; }
+    if (err) {
+      setError(err);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -71,7 +77,10 @@ export function useAuth() {
 
   async function signup(name: string, email: string, password: string) {
     const err = validate(email, password, name);
-    if (err) { setError(err); return; }
+    if (err) {
+      setError(err);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -97,5 +106,15 @@ export function useAuth() {
     setError(null);
   }
 
-  return { user, loading, isCheckingAuth, error, login, signup, googleSignIn, logout, clearError };
+  return {
+    user,
+    loading,
+    isCheckingAuth,
+    error,
+    login,
+    signup,
+    googleSignIn,
+    logout,
+    clearError,
+  };
 }
