@@ -20,40 +20,6 @@ import { OAuth2Client } from "google-auth-library";
 
 const oAuth2Client = new OAuth2Client();
 
-function toTokenPayload(user: User): TokenPayload {
-  const payload: TokenPayload = {
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-  };
-  if (user.image) payload.image = user.image;
-  return payload;
-}
-
-function toUserResponse(user: User) {
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    image: user.image,
-  };
-}
-
-function issueSession(
-  res: Response,
-  user: User,
-  statusCode: number,
-  message: string,
-) {
-  const payload = toTokenPayload(user);
-  setAuthCookies(
-    res,
-    generateAccessToken(payload),
-    generateRefreshToken({ userId: user.id }),
-  );
-  return HttpResponse(res, statusCode, { message, user: toUserResponse(user) });
-}
-
 export const register = async (req: Request, res: Response) => {
   const { email, password, name } = req.body;
 
@@ -154,3 +120,37 @@ export const logout = async (req: Request, res: Response) => {
   clearAuthCookies(res);
   return HttpResponse(res, 200, { message: "Logged out successfully" });
 };
+
+function toTokenPayload(user: User): TokenPayload {
+  const payload: TokenPayload = {
+    userId: user.id,
+    email: user.email,
+    name: user.name,
+  };
+  if (user.image) payload.image = user.image;
+  return payload;
+}
+
+function toUserResponse(user: User) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+  };
+}
+
+function issueSession(
+  res: Response,
+  user: User,
+  statusCode: number,
+  message: string,
+) {
+  const payload = toTokenPayload(user);
+  setAuthCookies(
+    res,
+    generateAccessToken(payload),
+    generateRefreshToken({ userId: user.id }),
+  );
+  return HttpResponse(res, statusCode, { message, user: toUserResponse(user) });
+}

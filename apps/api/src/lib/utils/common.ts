@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import { HttpError } from "../errors/HttpError";
+import * as z from "zod";
 
 /**
  * Sends a standardized JSON HTTP response with a success flag and data payload.
@@ -33,6 +35,26 @@ export function asyncHandler(
       await fn(req, res);
     } catch (error) {
       next(error);
+    }
+  };
+}
+
+/**
+ * Middleware to validate request body against a Zod schema
+ * @param schema - The Zod schema to validate against
+ */
+export function validateSchema<T>(schema: z.ZodTypeAny) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = schema.parse(req.body);
+      req.body = result;
+      next();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw HttpError.BadRequest("Invalid request data");
+      }
+      console.error("Zod validation error:", error);
+      throw HttpError.InternalServerError("Server error during zod validation");
     }
   };
 }

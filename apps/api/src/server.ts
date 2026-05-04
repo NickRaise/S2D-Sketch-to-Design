@@ -31,12 +31,12 @@ app.get("/me", authMiddleware, (req: AuthRequest, res: Response) => {
 });
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error("Global error handler:", err);
   if (err instanceof HttpError) {
     return res
       .status(err.statusCode)
       .json({ success: false, error: err.message });
   }
+  console.error("Global error handler:", err);
   return res.status(500).json({ error: "Internal Server Error" });
 });
 
