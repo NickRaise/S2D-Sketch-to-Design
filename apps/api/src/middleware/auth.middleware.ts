@@ -1,48 +1,38 @@
 import { NextFunction, Request, Response } from "express";
-import { parse } from "cookie";
 import { HttpError } from "../lib/errors/HttpError";
-import { getToken, JWT } from "next-auth/jwt";
-
-const NEXT_AUTH_SECRET = process.env.NEXTAUTH!;
+import { verifyAccessToken, TokenPayload } from "../lib/utils/tokens";
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
     email: string;
-    name?: string | undefined;
+    name: string;
   };
 }
 
-export const authMiddleware = async (
+export const authMiddleware = (
   req: AuthRequest,
   res: Response,
   next: NextFunction,
 ) => {
-  const token = await getTokenFromRequest(req);
+  const token = req.cookies?.access_token;
 
   if (!token) {
     throw new HttpError(401, "Unauthorized: No token provided");
   }
 
-  if (!token.email || !token.userId) {
-    throw new HttpError(401, "Unauthorized: Invalid token");
+  let payload: TokenPayload;
+  try {
+    payload = verifyAccessToken(token);
+  } catch {
+    throw new HttpError(401, "Unauthorized: Invalid or expired token");
   }
 
   req.user = {
-    id: token.userId,
-    email: token.email,
-    name: token.name,
+    id: payload.userId,
+    email: payload.email,
+    name: payload.name,
   };
 
   next();
-};
-
-const getTokenFromRequest = async (req: AuthRequest): Promise<JWT | null> => {
-  try {
-    const token = await getToken({ req, secret: NEXT_AUTH_SECRET });
-    return token;
-  } catch (error) {
-    console.error("Error extracting token from request:", error);
-    return null;
-  }
 };

@@ -26,7 +26,7 @@ export function HttpResponse(
  * @param fn - The async API route handler function
  */
 export function asyncHandler(
-  fn: (req: Request, res: Response) => Promise<void>,
+  fn: (req: Request, res: Response) => Promise<any>,
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
