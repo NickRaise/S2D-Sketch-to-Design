@@ -5,7 +5,7 @@ import {
   findUserById,
 } from "../services/auth.service";
 import { HttpError } from "../lib/errors/HttpError";
-import { HttpResponse } from "../lib/utils/common";
+import { HttpResponse, validateSchema } from "../lib/utils/common";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -17,11 +17,27 @@ import {
 import bcrypt from "bcrypt";
 import { User } from "@db/prisma/types";
 import { OAuth2Client } from "google-auth-library";
+import * as z from "zod";
+
+const RegisterSchema = z.object({
+  email: z.email(),
+  password: z.string().min(6),
+  name: z.string().min(1),
+});
+
+const LoginSchema = z.object({
+  email: z.email(),
+  password: z.string().min(6),
+});
+
+const GoogleOAuthSchema = z.object({
+  accessToken: z.string(),
+});
 
 const oAuth2Client = new OAuth2Client();
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password, name } = req.body;
+  const { email, password, name } = validateSchema(req.body, RegisterSchema);
 
   const user = await findUserByEmail(email);
 
@@ -42,7 +58,7 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password } = validateSchema(req.body, LoginSchema);
 
   const user = await findUserByEmail(email);
   if (!user || !(await bcrypt.compare(password, user.password || ""))) {
@@ -53,7 +69,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const googleOAuth = async (req: Request, res: Response) => {
-  const { accessToken } = req.body;
+  const { accessToken } = validateSchema(req.body, GoogleOAuthSchema);
   if (!accessToken)
     throw HttpError.BadRequest("Google access token is required");
 

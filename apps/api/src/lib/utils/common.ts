@@ -37,21 +37,29 @@ export function asyncHandler(
 }
 
 /**
- * Middleware to validate request body against a Zod schema
+ * Validates data against a Zod schema and throws an HttpError if validation fails.
+ * @param data - The data to validate
  * @param schema - The Zod schema to validate against
+ * @returns The validated data if validation succeeds
+ * @throws HttpError with status 400 if validation fails, or 500 for unexpected errors
  */
-export function validateSchema<T>(schema: z.ZodTypeAny) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const result = schema.parse(req.body);
-      req.body = result;
-      next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        throw HttpError.BadRequest("Invalid request data");
-      }
-      console.error("Zod validation error:", error);
-      throw HttpError.InternalServerError("Server error during zod validation");
+export function validateSchema<T extends z.ZodTypeAny>(
+  data: unknown,
+  schema: T,
+): z.infer<T> {
+  try {
+    return schema.parse(data);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const message = error.issues
+        .map((err) => {
+          const field = err.path.join(".");
+          return field ? `${field}: ${err.message}` : err.message;
+        })
+        .join(", ");
+      throw HttpError.BadRequest(message);
     }
-  };
+    console.error("Zod validation error:", error);
+    throw HttpError.InternalServerError("Server error during zod validation");
+  }
 }

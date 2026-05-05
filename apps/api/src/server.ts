@@ -3,10 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { authRouter } from "./routes/auth";
-import {
-  AuthenticatedRequest,
-  authMiddleware,
-} from "./middleware/auth.middleware";
+import { authMiddleware } from "./middleware/auth.middleware";
 import { HttpError } from "./lib/errors/HttpError";
 import { HttpResponse } from "./lib/utils/common";
 import { projectRouter } from "./routes/project";
@@ -36,7 +33,7 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 // Protected route example
-app.get("/me", authMiddleware, (req: AuthenticatedRequest, res: Response) => {
+app.get("/me", authMiddleware, (req: Request, res: Response) => {
   return HttpResponse(res, 200, { message: "User retrieved", user: req.user });
 });
 
