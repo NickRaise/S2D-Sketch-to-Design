@@ -5,7 +5,7 @@ export interface IUser {
   image?: string;
 }
 
-export type IApiResponse<T = Record<string, unknown>> = {
+export type ApiResponse<T = Record<string, unknown>> = {
   success: boolean;
   message: string;
 } & T;

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import api from "@/lib/axios";
-import type { IUser, IApiResponse, IAuthData } from "@/types/auth";
+import type { IUser, IAuthData, ApiResponse } from "@/types/auth";
 
 interface AuthState {
   user: IUser | null;
@@ -18,7 +18,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   checkAuth: async () => {
     try {
-      const res = await api.get<IApiResponse<IAuthData>>("/me");
+      const res = await api.get<ApiResponse<IAuthData>>("/me");
       set({ user: res.data.user });
     } catch {
       set({ user: null });
@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   login: async (email, password) => {
-    const res = await api.post<IApiResponse<IAuthData>>("/auth/login", {
+    const res = await api.post<ApiResponse<IAuthData>>("/auth/login", {
       email,
       password,
     });
@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signup: async (name, email, password) => {
-    const res = await api.post<IApiResponse<IAuthData>>("/auth/register", {
+    const res = await api.post<ApiResponse<IAuthData>>("/auth/register", {
       name,
       email,
       password,
@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   googleLogin: async (accessToken) => {
-    const res = await api.post<IApiResponse<IAuthData>>("/auth/oauth/google", {
+    const res = await api.post<ApiResponse<IAuthData>>("/auth/oauth/google", {
       accessToken,
     });
     set({ user: res.data.user });
