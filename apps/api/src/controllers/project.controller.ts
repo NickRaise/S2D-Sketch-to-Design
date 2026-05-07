@@ -6,13 +6,18 @@ import {
   getProjectById,
 } from "../services/project.service";
 import { HttpError } from "../lib/errors/HttpError";
-import { HttpResponse, validateSchema } from "../lib/utils/common";
+import {
+  HttpResponse,
+  stripUndefined,
+  validateSchema,
+} from "../lib/utils/common";
 import * as z from "zod";
 import { AuthenticatedRequest } from "../lib/types/global";
 
 export const CreateProjectSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  thumbnail: z.string().optional(),
 });
 
 export const getProject = async (req: AuthenticatedRequest, res: Response) => {
@@ -24,7 +29,7 @@ export const getProject = async (req: AuthenticatedRequest, res: Response) => {
 
   const project = await getProjectById(projectId);
   if (!project || project.userId !== req.user.id) {
-    HttpError.NotFound("Project not found");
+    throw HttpError.NotFound("Project not found");
   }
 
   HttpResponse(res, 200, { message: "Project retrieved", project });
@@ -34,9 +39,14 @@ export const createProject = async (
   req: AuthenticatedRequest,
   res: Response,
 ) => {
-  const { name, description } = validateSchema(req.body, CreateProjectSchema);
+  const data = validateSchema(req.body, CreateProjectSchema);
 
-  const newProject = await createProjectForUser(req.user.id, name, description);
+  const typeSafeData = stripUndefined(data);
+
+  const newProject = await createProjectForUser({
+    userId: req.user.id,
+    ...typeSafeData,
+  });
 
   HttpResponse(res, 201, { message: "Project created", project: newProject });
 };
@@ -68,4 +78,4 @@ export const deleteProject = async (
   await deleteProjectById(projectId);
 
   HttpResponse(res, 200, { message: "Project deleted" });
-}
+};

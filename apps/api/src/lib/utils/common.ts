@@ -63,3 +63,27 @@ export function validateSchema<T extends z.ZodTypeAny>(
     throw HttpError.InternalServerError("Server error during zod validation");
   }
 }
+
+/** Utility function to remove undefined properties from an object
+ * @param obj - The object to strip undefined properties from
+ * @returns A new object with all undefined properties removed
+ */
+export function stripUndefined<T extends Record<string, any>>(
+  obj: T,
+): {
+  [K in keyof T]: Exclude<T[K], undefined>;
+} {
+  const result: any = {};
+
+  for (const key in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+
+    const value = obj[key];
+
+    if (value !== undefined) {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}

@@ -1,6 +1,8 @@
 import prisma from "@db/prisma";
 import { HttpError } from "../lib/errors/HttpError";
-import { Project } from "@db/prisma/types";
+import { Prisma, Project } from "@db/prisma/types";
+import { CreateProjectSchema } from "../controllers/project.controller";
+import * as z from "zod";
 
 export const getProjectById = async (
   projectId: string,
@@ -14,17 +16,11 @@ export const getProjectById = async (
 };
 
 export const createProjectForUser = async (
-  userId: string,
-  name: string,
-  description: string | undefined,
+  data: Prisma.ProjectUncheckedCreateInput,
 ): Promise<Project> => {
   try {
     return await prisma.project.create({
-      data: {
-        userId,
-        name,
-        description: description || null,
-      },
+      data,
     });
   } catch (error) {
     console.error("Error creating project:", error);
