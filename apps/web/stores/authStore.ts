@@ -28,17 +28,26 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   login: async (email, password) => {
-    const res = await api.post<IApiResponse<IAuthData>>("/auth/login", { email, password });
+    const res = await api.post<IApiResponse<IAuthData>>("/auth/login", {
+      email,
+      password,
+    });
     set({ user: res.data.user });
   },
 
   signup: async (name, email, password) => {
-    const res = await api.post<IApiResponse<IAuthData>>("/auth/register", { name, email, password });
+    const res = await api.post<IApiResponse<IAuthData>>("/auth/register", {
+      name,
+      email,
+      password,
+    });
     set({ user: res.data.user });
   },
 
   googleLogin: async (accessToken) => {
-    const res = await api.post<IApiResponse<IAuthData>>("/auth/oauth/google", { accessToken });
+    const res = await api.post<IApiResponse<IAuthData>>("/auth/oauth/google", {
+      accessToken,
+    });
     set({ user: res.data.user });
   },
 

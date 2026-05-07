@@ -14,7 +14,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 enum CreditType {
   grant
   consume
@@ -51,72 +50,72 @@ enum AuthProvider {
 }
 
 model User {
-  id              String  @id @default(cuid())
-  
-  name            String
-  email           String  @unique
-  image           String?
+  id String @id @default(cuid())
 
-  password        String?
-  authProvider    AuthProvider        
+  name  String
+  email String  @unique
+  image String?
 
-  projects        Project[]
-  subscription    Subscription?
-  creditBalance   CreditBalance?
-  creditLedger    CreditLedger[]    
+  password     String?
+  authProvider AuthProvider
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt()
+  projects      Project[]
+  subscription  Subscription?
+  creditBalance CreditBalance?
+  creditLedger  CreditLedger[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model Subscription {
-  id                String  @id @default(cuid())
-  stripeCustomerId  String
-  stripeSubId       String
-  status            SubscriptionStatus
-  planType          PlanType
-  currentPeriodEnd  DateTime
-  cancelAt          DateTime?
-  trialEndsAt       DateTime?
+  id               String             @id @default(cuid())
+  stripeCustomerId String
+  stripeSubId      String
+  status           SubscriptionStatus
+  planType         PlanType
+  currentPeriodEnd DateTime
+  cancelAt         DateTime?
+  trialEndsAt      DateTime?
 
-  userId            String @unique
-  user              User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ledgerEntries     CreditLedger[]
+  userId        String         @unique
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledgerEntries CreditLedger[]
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   @@index([userId])
   @@index([stripeSubId])
 }
 
 model CreditBalance {
-  id              String  @id @default(cuid())
+  id String @id @default(cuid())
 
-  balance         Int @default(0)
+  balance Int @default(0)
 
-  userId          String  @unique
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model CreditLedger {
-  id              String  @id @default(cuid())
+  id String @id @default(cuid())
 
-  amount          Int
-  type            CreditType
-  reason          String?
-  idempotencyKey  String @unique
-  metadata        Json?
+  amount         Int
+  type           CreditType
+  reason         String?
+  idempotencyKey String     @unique
+  metadata       Json?
 
-  subscriptionId  String?
-  subscription    Subscription? @relation(fields: [subscriptionId], references: [id])
-  userId          String
-  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime @default(now())
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([subscriptionId])
@@ -124,127 +123,128 @@ model CreditLedger {
 }
 
 model Project {
-  id                String  @id @default(cuid())
-  name              String
-  description       String?
-  viewportData      Json?
-  thumbnail         String?
-  isPublic          Boolean @default(false)
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  viewportData Json?
+  thumbnail    String?
+  isPublic     Boolean @default(false)
 
-  userId            String
-  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images            ProjectImage[]
-  styleGuide        StyleGuide?
-  frames            Frame[]
-  generationJobs    GenerationJob[]
-  results           GeneratedResult[]
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images         ProjectImage[]
+  styleGuide     StyleGuide?
+  frames         Frame[]
+  generationJobs GenerationJob[]
+  results        GeneratedResult[]
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   @@index([userId])
 }
 
 model ProjectImage {
-  id              String  @id @default(cuid())
-  url             String
-  type            ImageType
+  id   String    @id @default(cuid())
+  url  String
+  type ImageType
 
-  projectId       String
-  project         Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([projectId])
 }
 
 model StyleGuide {
-  id                String  @id @default(cuid())
-  themeName         String
-  themeDescription  String
-  colors            Json
-  typography        Json
-  rawOutput         Json
+  id               String @id @default(cuid())
+  themeName        String
+  themeDescription String
+  colors           Json
+  typography       Json
+  rawOutput        Json
 
-  projectId         String  @unique
-  project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  jobs              GenerationJob[]
+  projectId String          @unique
+  project   Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  jobs      GenerationJob[]
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model Frame {
-  id                String  @id @default(cuid())
-  name              String? // Can remove this
-  x                 Float
-  y                 Float
-  height            Float
-  width             Float
-  
-  projectId         String
-  project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  shapes            Shape[]
+  id     String  @id @default(cuid())
+  name   String? // Can remove this
+  x      Float
+  y      Float
+  height Float
+  width  Float
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt()
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  shapes    Shape[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   @@index([projectId])
 }
 
 model GenerationJob {
-  id                String  @id @default(cuid())
-  status            GenerationStatus
-  error             String?
-  inputSnapshot     Json  // stores all the input values: Frame, images, styleGuide, prompt
+  id            String           @id @default(cuid())
+  status        GenerationStatus
+  error         String?
+  inputSnapshot Json // stores all the input values: Frame, images, styleGuide, prompt
 
-  projectId         String
-  project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  styleGuideId      String?
-  styleGuide        StyleGuide? @relation(fields: [styleGuideId], references: [id])
-  result            GeneratedResult[]
+  projectId    String
+  project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  styleGuideId String?
+  styleGuide   StyleGuide?       @relation(fields: [styleGuideId], references: [id])
+  result       GeneratedResult[]
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   @@index([projectId, status])
   @@index([createdAt])
 }
 
 model GeneratedResult {
-  id                String  @id @default(cuid())
-  htmlOutput        String?
-  version           Int
-  status            GenerationStatus
+  id         String           @id @default(cuid())
+  htmlOutput String?
+  version    Int
+  status     GenerationStatus
 
-  jobId             String
-  job               GenerationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String
+  job   GenerationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
-  projectId         String
-  project           Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   @@index([projectId])
   @@index([projectId, version])
 }
 
 model Shape {
-  id                String  @id @default(cuid())
-  type              String // arrow,line,rectangle,circle,text
-  height            Float
-  width             Float
-  x                 Float
-  y                 Float
-  text              String?
-  style             Json  // colors, fontsize, font
-  
-  frameId           String
-  frame             Frame @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  id     String  @id @default(cuid())
+  type   String // arrow,line,rectangle,ellipse,text,freedraw
+  height Float
+  width  Float
+  x      Float
+  y      Float
+  text   String?
+  points Json? // freedraw only: Point[]; bounding box (x,y,w,h) is computed on save
+  style  Json // stroke, strokeWidth, fill, fontSize, fontFamily, etc.
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt()
+  frameId String
+  frame   Frame  @relation(fields: [frameId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
   @@index([frameId])
 }
