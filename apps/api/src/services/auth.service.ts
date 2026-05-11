@@ -15,7 +15,10 @@ export const findUserByEmail = async (email: string): Promise<User | null> => {
     return await prisma.user.findUnique({ where: { email } });
   } catch (error) {
     console.error("Error finding user by email:", error);
-    throw HttpError.InternalServerError("Error finding user by email");
+    throw HttpError.InternalServerError(
+      "We are facing some issues. Please try again later.",
+      "Failed to find user by email",
+    );
   }
 };
 
@@ -24,7 +27,10 @@ export const findUserById = async (id: string): Promise<User | null> => {
     return await prisma.user.findUnique({ where: { id } });
   } catch (error) {
     console.error("Error finding user by id:", error);
-    throw HttpError.InternalServerError("Error finding user by id");
+    throw HttpError.InternalServerError(
+      "We are facing some issues. Please try again later.",
+      "Failed to find user by id",
+    );
   }
 };
 
@@ -33,6 +39,9 @@ export const createUser = async (data: ICreateUserData): Promise<User> => {
     return await prisma.user.create({ data });
   } catch (error) {
     console.error("Error creating user:", error);
-    throw HttpError.InternalServerError("Error creating user");
+    throw HttpError.InternalServerError(
+      "We are facing some issues. Please try again later.",
+      "Failed to create user",
+    );
   }
 };

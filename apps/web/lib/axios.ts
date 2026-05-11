@@ -39,10 +39,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        if (
-          typeof window !== "undefined" &&
-          window.location.pathname !== "/auth"
-        ) {
+        if (window?.location.pathname !== "/auth") {
           window.location.href = "/auth";
         }
         return Promise.reject(refreshError);
