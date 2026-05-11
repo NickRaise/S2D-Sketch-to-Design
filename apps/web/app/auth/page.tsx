@@ -15,7 +15,16 @@ const page = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-  const { login, signup, googleSignIn, loading, isCheckingAuth, error, clearError, user } = useAuth();
+  const {
+    login,
+    signup,
+    googleSignIn,
+    loading,
+    isCheckingAuth,
+    error,
+    clearError,
+    user,
+  } = useAuth();
 
   useEffect(() => {
     if (!isCheckingAuth && user) {
