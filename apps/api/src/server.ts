@@ -1,5 +1,5 @@
+import dotenv from "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { authRouter } from "./routes/auth";
@@ -8,7 +8,6 @@ import { HttpError } from "./lib/errors/HttpError";
 import { HttpResponse } from "./lib/utils/common";
 import { projectRouter } from "./routes/project";
 
-dotenv.config();
 const app = express();
 
 // CORS configuration
