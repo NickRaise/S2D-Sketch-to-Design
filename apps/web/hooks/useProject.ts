@@ -14,7 +14,7 @@ export const useProject = () => {
     createProjectFailure,
   } = useProjectStore();
 
-  const canCreateProject = async () => {
+  const createProject = async () => {
     if (!user?.id) {
       // TODO: throw an toast error here
       return false;
@@ -26,12 +26,15 @@ export const useProject = () => {
       const thumbnail = generateGradientThumbnail();
       // call project creation api
       const project = await api.post("/projects", {
+        // TODO: Dynamically set the project data using project store
         name: "Untitled Project",
-        thumbnail,
+        description: "",
+        isPublic: false,
+        // no need to send thumbnail to backend, it's generated on the fly in the frontend
       });
 
       // Needs changes and correct mapping
-      addProject(project.data);
+      addProject({ ...project.data, thumbnail });
       createProjectSuccess();
       // success toast can be added here
     } catch (err) {
@@ -47,10 +50,11 @@ export const useProject = () => {
     projects,
     projectTotal: total,
     canCreate: !!user?.id,
+    createProject,
   };
 };
 
-const generateGradientThumbnail = () => {
+function generateGradientThumbnail() {
   const gradients = [
     ["#667eea", "#764ba2"],
     ["#ff758c", "#ff7eb3"],
@@ -166,4 +170,4 @@ const generateGradientThumbnail = () => {
       : Buffer.from(svg).toString("base64");
 
   return `data:image/svg+xml;base64,${encoded}`;
-};
+}

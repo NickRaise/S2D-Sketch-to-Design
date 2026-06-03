@@ -2,8 +2,11 @@
 import { CircleQuestionMark, Hash, LayoutTemplate } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Button } from "../button";
-import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
+import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useAuthStore } from "@/stores/authStore";
+import { IUser } from "@/types/auth";
+import CreateButton from "../buttons/create-button";
 
 interface ITabs {
   label: string;
@@ -19,9 +22,7 @@ const Navbar = () => {
   const pathname = usePathname();
   const hasCanvas = pathname.includes("canvas");
   const hasStyleGuide = pathname.includes("style-guide");
-
-  // TODO: fetch user data using the global state storage
-  let user: any;
+  const user = useAuthStore((state) => state.user) as IUser;
 
   const tabs: ITabs[] = [
     {
@@ -40,7 +41,7 @@ const Navbar = () => {
 
   return (
     <div>
-      <div className="grid grid-col-2 lg:grid-cols-3 p-6 fixed top-0 left-0 right-0 z-50">
+      <div className="grid grid-cols-2 lg:grid-cols-3 p-6 fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center gap-4">
           <Link
             href="/dashboard"
@@ -90,24 +91,25 @@ const Navbar = () => {
             })}
           </div>
         </div>
-      </div>
-      <div className=" flex items-center gap-4 justify-end">
-        <span className="text-sm text-white/50"> Todo: credits</span>
-        <Button
-          variant="secondary"
-          className="rounded-full h-12 w-12 flex-items-center justify-center backdrop-blur-xl bg-white/8 border border-white/12 saturate-120 hover:bg-white/12"
-        >
-          <CircleQuestionMark className="size-5 text-white" />
-        </Button>
-        <Avatar className="size-5 ml-2">
-          <AvatarImage src={user?.image} />
-          <AvatarFallback>
-            {user?.name
-              ?.split(" ")
-              .map((n: string) => n[0])
-              .join("")}
-          </AvatarFallback>
-        </Avatar>
+        <div className="flex items-center gap-4 justify-end">
+          <span className="text-sm text-white/50"> Todo: credits</span>
+          <Button
+            variant="secondary"
+            className="rounded-full h-12 w-12 flex-items-center justify-center backdrop-blur-xl bg-white/8 border border-white/12 saturate-120 hover:bg-white/12"
+          >
+            <CircleQuestionMark className="size-5 text-white" />
+          </Button>
+          <Avatar className="size-12 ml-2">
+            <AvatarImage src={user?.image} />
+            <AvatarFallback>
+              {user?.name
+                ?.split(" ")
+                .map((n: string) => n[0])
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+          {!hasCanvas && !hasStyleGuide && <CreateButton />}
+        </div>
       </div>
     </div>
   );
