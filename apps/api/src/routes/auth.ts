@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { asyncHandler, validateSchema } from "../lib/utils/common";
+import { asyncHandler } from "../lib/utils/common";
 import {
   googleOAuth,
   login,

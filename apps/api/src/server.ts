@@ -7,10 +7,14 @@ import { authMiddleware } from "./middleware/auth.middleware";
 import { HttpError } from "./lib/errors/HttpError";
 import { HttpResponse } from "./lib/utils/common";
 import { projectRouter } from "./routes/project";
+import { frameRouter } from "./routes/frame";
+import { imageRouter } from "./routes/image";
+import { generationJobRouter } from "./routes/generation";
+import { billingRouter } from "./routes/billing";
+import { stripeWebhookHandler } from "./controllers/billing.controller";
 
 const app = express();
 
-// CORS configuration
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
@@ -18,25 +22,31 @@ app.use(
   }),
 );
 
-// Additional utility middleware
+// Stripe webhook must receive raw body before express.json() parses it
+app.post(
+  "/billing/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhookHandler,
+);
+
 app.use(express.json());
 app.use(cookieParser());
 
-// Routes
 app.use("/auth", authRouter);
-app.use("/project", authMiddleware, projectRouter);
+app.use("/projects", authMiddleware, projectRouter);
+app.use("/frames", authMiddleware, frameRouter);
+app.use("/images", authMiddleware, imageRouter);
+app.use("/generation-jobs", authMiddleware, generationJobRouter);
+app.use("/billing", authMiddleware, billingRouter);
 
-// Health check endpoint
 app.get("/health", (req: Request, res: Response) => {
   return res.status(200).json({ status: "ok", timestamp: Date.now() });
 });
 
-// Protected route example
 app.get("/me", authMiddleware, (req: Request, res: Response) => {
   return HttpResponse(res, 200, { message: "User retrieved", user: req.user });
 });
 
-// Global error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof HttpError) {
     return res
